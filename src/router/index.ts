@@ -11,7 +11,7 @@ export const constantRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/',
     component: Layout,
-    redirect: '/seer',
+    redirect: '/dashboard/analysis',
     name: 'Root',
     meta: {
       hidden: true
@@ -57,6 +57,29 @@ export const constantRouterMap: AppRouteRecordRaw[] = [
 ]
 
 export const asyncRouterMap: AppRouteRecordRaw[] = [
+  {
+    path: '/dashboard',
+    component: Layout,
+    redirect: '/dashboard/analysis',
+    name: 'Dashboard',
+    meta: {
+      title: '主页',
+      icon: 'ant-design:dashboard-filled',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'analysis',
+        component: () => import('@/views/Seer/Index.vue'),
+        name: 'Analysis',
+        meta: {
+          title: '专家管理',
+          noCache: true,
+          affix: true
+        }
+      }
+    ]
+  },
   {
     path: '/seer',
     component: Layout,
