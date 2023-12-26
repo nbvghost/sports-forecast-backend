@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { store } from '../index'
+import { store } from '@/store'
 import { setCssVar, humpToUnderline } from '@/utils'
 import { ElMessage, ComponentSize } from 'element-plus'
 
@@ -45,49 +45,63 @@ export const useAppStore = defineStore('app', {
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
       size: true, // 尺寸图标
-      locale: true, // 多语言图标
+      locale: false, // 多语言图标
       tagsView: true, // 标签页
       tagsViewIcon: true, // 是否显示标签图标
       logo: true, // logo
       fixedHeader: true, // 固定toolheader
       footer: true, // 显示页脚
       greyMode: false, // 是否开始灰色模式，用于特殊悼念日
-      dynamicRouter: true, // 是否动态路由
+      dynamicRouter: false, // 是否动态路由
       serverDynamicRouter: true, // 是否服务端渲染动态路由
       fixedMenu: false, // 是否固定菜单
 
-      layout: 'classic', // layout布局
+      layout: 'top', // layout布局
       isDark: false, // 是否是暗黑模式
       currentSize: 'default', // 组件尺寸
       theme: {
         // 主题色
-        elColorPrimary: '#409eff',
+        //elColorPrimary: '#409eff',
         // 左侧菜单边框颜色
-        leftMenuBorderColor: 'inherit',
+        //leftMenuBorderColor: 'inherit',
         // 左侧菜单背景颜色
-        leftMenuBgColor: '#001529',
+        //leftMenuBgColor: '#24292e',
         // 左侧菜单浅色背景颜色
-        leftMenuBgLightColor: '#0f2438',
+        //leftMenuBgLightColor: '#33383d',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'var(--el-color-primary)',
+        //leftMenuBgActiveColor: 'var(--el-color-primary)',
         // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
+        //leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
         // 左侧菜单字体颜色
-        leftMenuTextColor: '#bfcbd9',
+        //leftMenuTextColor: '#bfcbd9',
         // 左侧菜单选中字体颜色
-        leftMenuTextActiveColor: '#fff',
+        //leftMenuTextActiveColor: '#fff',
         // logo字体颜色
-        logoTitleTextColor: '#fff',
+        //logoTitleTextColor: '#fff',
         // logo边框颜色
-        logoBorderColor: 'inherit',
+        //logoBorderColor: 'inherit',
         // 头部背景颜色
-        topHeaderBgColor: '#fff',
+        //topHeaderBgColor: '#fff',
         // 头部字体颜色
-        topHeaderTextColor: 'inherit',
+        //topHeaderTextColor: 'inherit',
         // 头部悬停颜色
-        topHeaderHoverColor: '#f6f6f6',
+        //topHeaderHoverColor: '#f6f6f6',
         // 头部边框颜色
-        topToolBorderColor: '#eee'
+        //topToolBorderColor: '#eee'
+        elColorPrimary: '#409eff',
+        leftMenuBgActiveColor: 'var(--el-color-primary)',
+        leftMenuBgColor: '#151515',
+        leftMenuBgLightColor: '#242424',
+        leftMenuBorderColor: 'inherit',
+        leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
+        leftMenuTextActiveColor: '#fff',
+        leftMenuTextColor: '#bfcbd9',
+        logoBorderColor: '#151515',
+        logoTitleTextColor: '#fff',
+        topHeaderBgColor: '#151515',
+        topHeaderHoverColor: '#242424',
+        topHeaderTextColor: '#fff',
+        topToolBorderColor: '#151515'
       }
     }
   },

@@ -4,16 +4,16 @@ import { Form, FormSchema } from '@/components/Form'
 import { useI18n } from '@/hooks/web/useI18n'
 import { ElCheckbox, ElLink } from 'element-plus'
 import { useForm } from '@/hooks/web/useForm'
-import { loginApi, getTestRoleApi, getAdminRoleApi } from '@/api/login'
 import { useAppStore } from '@/store/modules/app'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useRouter } from 'vue-router'
 import type { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router'
-import { UserType } from '@/api/login/types'
 import { useValidator } from '@/hooks/web/useValidator'
 import { Icon } from '@/components/Icon'
 import { useUserStore } from '@/store/modules/user'
 import { BaseButton } from '@/components/Button'
+import { Admin } from '@/api/account/types'
+import { login } from '@/api/account'
 
 const { required } = useValidator()
 
@@ -30,8 +30,8 @@ const { currentRoute, addRoute, push } = useRouter()
 const { t } = useI18n()
 
 const rules = {
-  username: [required()],
-  password: [required()]
+  Account: [required()],
+  PassWord: [required()]
 }
 
 const schema = reactive<FormSchema[]>([
@@ -49,7 +49,7 @@ const schema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'username',
+    field: 'Account',
     label: t('login.username'),
     // value: 'admin',
     component: 'Input',
@@ -61,7 +61,7 @@ const schema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'password',
+    field: 'PassWord',
     label: t('login.password'),
     // value: 'admin',
     component: 'InputPassword',
@@ -191,8 +191,8 @@ const remember = ref(userStore.getRememberMe)
 const initLoginInfo = () => {
   const loginInfo = userStore.getLoginInfo
   if (loginInfo) {
-    const { username, password } = loginInfo
-    setValues({ username, password })
+    const { Account, PassWord } = loginInfo
+    setValues({ Account, PassWord })
   }
 }
 onMounted(() => {
@@ -226,26 +226,23 @@ const signIn = async () => {
   await formRef?.validate(async (isValid) => {
     if (isValid) {
       loading.value = true
-      const formData = await getFormData<UserType>()
+      const formData = await getFormData<Admin>()
 
       try {
-        const res = await loginApi(formData)
+        const res = await login(formData.Account, formData.PassWord)
 
         if (res) {
           // 是否记住我
           if (unref(remember)) {
-            userStore.setLoginInfo({
-              username: formData.username,
-              password: formData.password
-            })
+            userStore.setLoginInfo({ Account: formData.Account, PassWord: formData.PassWord })
           } else {
             userStore.setLoginInfo(undefined)
           }
           userStore.setRememberMe(unref(remember))
-          userStore.setUserInfo(res.data)
+          userStore.setUserInfo(res.Data)
           // 是否使用动态路由
           if (appStore.getDynamicRouter) {
-            getRole()
+            //getRole()
           } else {
             await permissionStore.generateRoutes('static').catch(() => {})
             permissionStore.getAddRouters.forEach((route) => {
@@ -263,7 +260,7 @@ const signIn = async () => {
 }
 
 // 获取角色信息
-const getRole = async () => {
+/* const getRole = async () => {
   const formData = await getFormData<UserType>()
   const params = {
     roleName: formData.username
@@ -273,7 +270,7 @@ const getRole = async () => {
       ? await getAdminRoleApi(params)
       : await getTestRoleApi(params)
   if (res) {
-    const routers = res.data || []
+    const routers = res.Data || []
     userStore.setRoleRouters(routers)
     appStore.getDynamicRouter && appStore.getServerDynamicRouter
       ? await permissionStore.generateRoutes('server', routers).catch(() => {})
@@ -285,7 +282,7 @@ const getRole = async () => {
     permissionStore.setIsAddRouters(true)
     push({ path: redirect.value || permissionStore.addRouters[0].path })
   }
-}
+} */
 
 // 去注册页面
 const toRegister = () => {

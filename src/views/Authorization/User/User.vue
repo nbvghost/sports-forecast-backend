@@ -27,8 +27,8 @@ const { tableRegister, tableState, tableMethods } = useTable({
       ...unref(searchParams)
     })
     return {
-      list: res.data.list || [],
-      total: res.data.total || 0
+      list: res.Data.list || [],
+      total: res.Data.total || 0
     }
   },
   fetchDelApi: async () => {
@@ -103,7 +103,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       },
       optionApi: async () => {
         const res = await getDepartmentApi()
-        return res.data.list
+        return res.Data.list
       }
     },
     table: {
@@ -204,9 +204,9 @@ const currentNodeKey = ref('')
 const departmentList = ref<DepartmentItem[]>([])
 const fetchDepartment = async () => {
   const res = await getDepartmentApi()
-  departmentList.value = res.data.list
+  departmentList.value = res.Data.list
   currentNodeKey.value =
-    (res.data.list[0] && res.data.list[0]?.children && res.data.list[0].children[0].id) || ''
+    (res.Data.list[0] && res.Data.list[0]?.children && res.Data.list[0].children[0].id) || ''
   await nextTick()
   unref(treeEl)?.setCurrentKey(currentNodeKey.value)
 }

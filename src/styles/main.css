@@ -1,0 +1,15 @@
+.card-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-header > * {
+    display: flex;
+    align-items: center;
+}
+
+.appearance-none input::-webkit-outer-spin-button,
+.appearance-none input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}

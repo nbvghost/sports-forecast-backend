@@ -20,7 +20,7 @@ const { tableRegister, tableState, tableMethods } = useTable({
   fetchDataApi: async () => {
     const res = await getMenuListApi()
     return {
-      list: res.data.list || []
+      list: res.Data.list || []
     }
   }
 })

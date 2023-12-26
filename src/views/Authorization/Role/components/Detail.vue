@@ -34,7 +34,7 @@ const treeData = ref<any[]>([])
 const getMenuList = async () => {
   const res = await getMenuListApi()
   if (res) {
-    treeData.value = res.data.list
+    treeData.value = res.Data.list
     await nextTick()
   }
 }

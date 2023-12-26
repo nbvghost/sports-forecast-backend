@@ -124,7 +124,7 @@ const formSchema = reactive<FormSchema[]>([
     },
     optionApi: async () => {
       const res = await getMenuListApi()
-      return res.data.list || []
+      return res.Data.list || []
     }
   },
   {

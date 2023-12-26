@@ -17,7 +17,7 @@ VITE_DROP_CONSOLE=true
 VITE_SOURCEMAP=false
 
 # 输出路径
-VITE_OUT_DIR=dist-pro
+VITE_OUT_DIR=../view/back
 
 # 标题
-VITE_APP_TITLE=ElementAdmin
+VITE_APP_TITLE=生舒体育管理后台

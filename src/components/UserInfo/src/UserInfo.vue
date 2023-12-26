@@ -31,9 +31,9 @@ const lockScreen = () => {
   dialogVisible.value = true
 }
 
-const toDocument = () => {
+/*const toDocument = () => {
   window.open('https://element-plus-admin-doc.cn/')
-}
+}*/
 </script>
 
 <template>
@@ -44,15 +44,15 @@ const toDocument = () => {
         alt=""
         class="w-[calc(var(--logo-height)-25px)] rounded-[50%]"
       />
-      <span class="<lg:hidden text-14px pl-[5px] text-[var(--top-header-text-color)]">{{
-        userStore.getUserInfo?.username
-      }}</span>
+      <span class="<lg:hidden text-14px pl-[5px] text-[var(--top-header-text-color)]">
+        {{ userStore.getUserInfo?.Name }}
+      </span>
     </div>
     <template #dropdown>
       <ElDropdownMenu>
-        <ElDropdownItem>
+        <!--<ElDropdownItem>
           <div @click="toDocument">{{ t('common.document') }}</div>
-        </ElDropdownItem>
+        </ElDropdownItem>-->
         <ElDropdownItem divided>
           <div @click="lockScreen">{{ t('lock.lockScreen') }}</div>
         </ElDropdownItem>

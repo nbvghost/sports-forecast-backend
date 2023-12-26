@@ -82,7 +82,7 @@ const getTableList = async (params?: Params) => {
       loading.value = false
     })
   if (res) {
-    tableDataList.value = res.data.list
+    tableDataList.value = res.Data.list
   }
 }
 

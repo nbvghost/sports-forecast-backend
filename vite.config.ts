@@ -6,7 +6,6 @@ import VueJsx from '@vitejs/plugin-vue-jsx'
 import progress from 'vite-plugin-progress'
 import EslintPlugin from 'vite-plugin-eslint'
 import { ViteEjsPlugin } from "vite-plugin-ejs"
-import { viteMockServe } from 'vite-plugin-mock'
 import PurgeIcons from 'vite-plugin-purge-icons'
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite"
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
@@ -67,7 +66,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         svgoOptions: true
       }),
       PurgeIcons(),
-      viteMockServe({
+      /*viteMockServe({
         ignore: /^\_/,
         mockPath: 'mock',
         localEnabled: !isBuild,
@@ -77,7 +76,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
 
           setupProdMockServer()
           `
-      }),
+      }),*/
       ViteEjsPlugin({
         title: env.VITE_APP_TITLE
       }),

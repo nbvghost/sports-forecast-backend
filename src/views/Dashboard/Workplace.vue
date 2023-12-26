@@ -74,7 +74,7 @@ const getRadar = async () => {
     set(
       radarOptionData,
       'radar.indicator',
-      res.data.map((v) => {
+      res.Data.map((v) => {
         return {
           name: t(v.name),
           max: v.max
@@ -87,11 +87,11 @@ const getRadar = async () => {
         type: 'radar',
         data: [
           {
-            value: res.data.map((v) => v.personal),
+            value: res.Data.map((v) => v.personal),
             name: t('workplace.personal')
           },
           {
-            value: res.data.map((v) => v.team),
+            value: res.Data.map((v) => v.team),
             name: t('workplace.team')
           }
         ]

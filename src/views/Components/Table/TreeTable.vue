@@ -16,8 +16,8 @@ const { tableRegister, tableState } = useTable({
       pageSize: unref(pageSize)
     })
     return {
-      list: res.data.list,
-      total: res.data.total
+      list: res.Data.list,
+      total: res.Data.total
     }
   }
 })

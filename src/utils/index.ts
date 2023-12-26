@@ -74,7 +74,7 @@ export const trim = (str: string) => {
  * @param {Date | number | string} time 需要转换的时间
  * @param {String} fmt 需要转换的格式 如 yyyy-MM-dd、yyyy-MM-dd HH:mm:ss
  */
-export function formatTime(time: Date | number | string, fmt: string) {
+export function formatTime(time: Date | number | string, fmt: string = 'yyyy-MM-dd HH:mm:ss') {
   if (!time) return ''
   else {
     const date = new Date(time)

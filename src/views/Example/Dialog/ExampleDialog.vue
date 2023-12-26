@@ -25,8 +25,8 @@ const { tableRegister, tableState, tableMethods } = useTable({
       ...unref(searchParams)
     })
     return {
-      list: res.data.list,
-      total: res.data.total
+      list: res.Data.list,
+      total: res.Data.total
     }
   },
   fetchDelApi: async () => {

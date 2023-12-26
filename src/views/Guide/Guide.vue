@@ -2,13 +2,18 @@
 import { ContentWrap } from '@/components/ContentWrap'
 import { useI18n } from '@/hooks/web/useI18n'
 import { useGuide } from '@/hooks/web/useGuide'
-
 const { t } = useI18n()
 
 const { drive } = useGuide()
 
 const guideStart = () => {
   drive()
+}
+
+if (import.meta.hot) {
+  import.meta.hot.on('vite:beforeFullReload', () => {
+    console.log('beforeFullReload-dd')
+  })
 }
 </script>
 
