@@ -7,3 +7,5 @@ dist-ssr
 *-lock.*
 pnpm-debug
 /.idea/
+stats.html
+

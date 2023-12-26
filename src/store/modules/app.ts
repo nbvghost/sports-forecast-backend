@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { store } from '@/store'
 import { setCssVar, humpToUnderline } from '@/utils'
+import { mix } from '@/utils/color'
 import { ElMessage, ComponentSize } from 'element-plus'
 
 interface AppState {
@@ -253,6 +254,7 @@ export const useAppStore = defineStore('app', {
         document.documentElement.classList.add('light')
         document.documentElement.classList.remove('dark')
       }
+      this.setPrimaryLight()
     },
     setCurrentSize(currentSize: ComponentSize) {
       this.currentSize = currentSize
@@ -267,9 +269,21 @@ export const useAppStore = defineStore('app', {
       for (const key in this.theme) {
         setCssVar(`--${humpToUnderline(key)}`, this.theme[key])
       }
+      this.setPrimaryLight()
     },
     setFooter(footer: boolean) {
       this.footer = footer
+    },
+    setPrimaryLight() {
+      if (this.theme.elColorPrimary) {
+        const elColorPrimary = this.theme.elColorPrimary
+        const color = this.isDark ? '#000000' : '#ffffff'
+        const lightList = [3, 5, 7, 8, 9]
+        lightList.forEach((v) => {
+          setCssVar(`--el-color-primary-light-${v}`, mix(color, elColorPrimary, v / 10))
+        })
+        setCssVar(`--el-color-primary-dark-2`, mix(color, elColorPrimary, 0.2))
+      }
     }
   },
   persist: true
