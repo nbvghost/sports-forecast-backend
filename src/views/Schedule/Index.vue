@@ -103,20 +103,8 @@ const scheduleDialogSchema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'EndAt',
-    label: '结束时间',
-    component: 'DatePicker',
-    componentProps: {
-      type: 'datetime',
-      valueFormat: 'YYYY-MM-DDTHH:mm:ss.SSSZ'
-    },
-    formItemProps: {
-      rules: [required()]
-    }
-  },
-  {
-    field: 'Guester',
-    label: '客队',
+    field: 'RData',
+    label: '盘口',
     component: 'Input',
     formItemProps: {
       rules: [required()]
@@ -131,16 +119,8 @@ const scheduleDialogSchema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'Rl',
-    label: 'RL',
-    component: 'Input',
-    formItemProps: {
-      rules: [required()]
-    }
-  },
-  {
-    field: 'Rn',
-    label: 'RN',
+    field: 'Guester',
+    label: '客队',
     component: 'Input',
     formItemProps: {
       rules: [required()]

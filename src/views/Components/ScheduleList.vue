@@ -5,6 +5,7 @@ import { TableColumn } from '@/components/Table'
 import { formatTime } from '@/utils'
 import { putScheduleList } from '@/api/schedule'
 import { useTable } from '@/hooks/web/useTable'
+import dayjs from 'dayjs'
 
 const props = defineProps({
   type: {
@@ -18,7 +19,11 @@ type QueryParams = {
   Name: string
   TypeName: string
 }
-const queryParams = ref<QueryParams>({ Name: '', TypeName: '足球', StartAt: new Date() })
+const queryParams = ref<QueryParams>({
+  Name: '',
+  TypeName: '',
+  StartAt: dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+})
 
 const shortcuts = [
   {
@@ -95,21 +100,8 @@ const scheduleColumns = reactive<TableColumn[]>([
     }
   },
   {
-    field: 'EndAt',
-    label: '结束时间',
-    slots: {
-      default: ({ row }) => {
-        return <>{formatTime(row.EndAt)}</>
-      }
-    }
-  },
-  {
-    field: 'Rl',
-    label: 'RL'
-  },
-  {
-    field: 'Rn',
-    label: 'RN'
+    field: 'RData',
+    label: '盘口'
   },
   {
     field: 'action',
@@ -195,6 +187,7 @@ const emit = defineEmits(['editRow', 'deleteRow', 'select'])
       <el-date-picker
         v-model="queryParams.StartAt"
         type="Date"
+        value-format="YYYY-MM-DDTHH:mm:ss.SSSZ"
         placeholder="选择日期"
         :shortcuts="shortcuts"
       />
@@ -207,6 +200,7 @@ const emit = defineEmits(['editRow', 'deleteRow', 'select'])
     </el-form-item>
   </el-form>
   <el-tabs style="margin-top: 20px" v-model="queryParams.TypeName" @tab-change="onTabChange">
+    <el-tab-pane label="全部" name="" />
     <el-tab-pane label="足球" name="足球" />
     <el-tab-pane label="篮球" name="篮球" />
     <el-tab-pane label="网球" name="网球" />

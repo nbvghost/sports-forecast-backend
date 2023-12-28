@@ -2,7 +2,6 @@
 import { ContentWrap } from '@/components/ContentWrap'
 import Table from '@/components/Table/src/Table.vue'
 import { useTable } from '@/hooks/web/useTable'
-import { putScheduleList } from '@/api/schedule'
 import { h, reactive, ref } from 'vue'
 import { TableColumn } from '@/components/Table'
 import { formatTime } from '@/utils'
@@ -10,12 +9,11 @@ import { postUserScoreRecharge, postUserState, putUserList } from '@/api/user'
 import { ElFormItem, ElInput, ElMessage, ElMessageBox, ElOption, ElSelect } from 'element-plus'
 import { BaseButton } from '@/components/Button'
 import { Dialog } from '@/components/Dialog'
-import ScheduleList from '@/views/Components/ScheduleList.vue'
 import { FormSchema } from '@/components/Form'
 import { useForm } from '@/hooks/web/useForm'
 import { useValidator } from '@/hooks/web/useValidator'
 import Form from '@/components/Form/src/Form.vue'
-import { User, UserWithSuperiorUser } from '@/api/user/types'
+import { UserInfoStateType, UserWithSuperiorUser } from '@/api/user/types'
 import Descriptions from '@/components/Descriptions/src/Descriptions.vue'
 import { DescriptionsSchema } from '@/components/Descriptions'
 import ScoreJournalList from '@/views/Components/ScoreJournalList.vue'
@@ -106,7 +104,7 @@ const userColumns = reactive<TableColumn[]>([
     slots: {
       default: ({ row }) => {
         let keyIndex = (row.UserInfoKeys || []).findIndex(
-          (value: string, index: number, obj: string[]) => value == 'State'
+          (value: string, _index: number, _obj: string[]) => value == 'State'
         )
         if (keyIndex > -1) {
           let value = row.UserInfoValues[keyIndex]
@@ -120,6 +118,8 @@ const userColumns = reactive<TableColumn[]>([
               break
           }
           return <>{valueLabel}</>
+        } else {
+          return <></>
         }
       }
     }
@@ -159,7 +159,7 @@ const userColumns = reactive<TableColumn[]>([
   }
 ])
 const onStateUser = (data) => {
-  const selectValue = ref('')
+  const selectValue = ref<UserInfoStateType>('')
   ElMessageBox({
     title: '选择状态',
     showCancelButton: true,
@@ -169,7 +169,7 @@ const onStateUser = (data) => {
         {
           modelValue: selectValue.value,
           'onUpdate:modelValue': (val: boolean | string | number) => {
-            selectValue.value = val
+            selectValue.value = val as UserInfoStateType
           }
         },
         [
@@ -198,7 +198,7 @@ const onScoreRechargeSubmit = async () => {
       let formData = await scoreRechargeDialogForm.formMethods.getFormData(true)
       elFormExpose?.resetFields()
       let res = await postUserScoreRecharge(
-        currentUser.value?.ID,
+        currentUser.value?.ID!,
         parseInt(formData.Score),
         formData.Reason
       )
@@ -315,7 +315,6 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
       :show-action="true"
       :flexible="true"
       :columns="userColumns"
-      @row-click="onUserRowClick"
       :data="userTableState.dataList.value"
       :loading="userTableState.loading.value"
       :pagination="{

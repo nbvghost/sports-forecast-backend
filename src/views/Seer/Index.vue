@@ -8,7 +8,11 @@ import {
   ElMessageBox,
   ElRow,
   ElUpload,
-  ElAvatar
+  ElAvatar,
+  UploadInstance,
+  UploadProps,
+  UploadRawFile,
+  genFileId
 } from 'element-plus'
 import { GetRestfull } from '@/api'
 import { useTable } from '@/hooks/web/useTable'
@@ -27,7 +31,7 @@ import { deleteSeer, postSeer } from '@/api/seer'
 import { PATH_URL } from '@/axios/service'
 import ScheduleList from '@/views/Components/ScheduleList.vue'
 import { deletePrediction, postPrediction, PutPredictionJoinScheduleList } from '@/api/prediction'
-import { deleteSchedule } from '@/api/schedule'
+import { UploadFile, UploadFiles } from 'element-plus/es/components/upload/src/upload'
 
 const { required } = useValidator()
 
@@ -182,7 +186,7 @@ const seerColumns = reactive<TableColumn[]>([
 
 const predictionTable = useTable({
   fetchDataApi: async () => {
-    const { currentPage, pageSize } = seerTable.tableState
+    const { currentPage, pageSize } = predictionTable.tableState
     const res = await PutPredictionJoinScheduleList(
       predictionQuery.value,
       predictionOrder.value,
@@ -203,6 +207,10 @@ const predictionColumns = reactive<TableColumn[]>([
     label: '#ID',
     width: 50,
     align: 'center'
+  },
+  {
+    field: 'Seer.Name',
+    label: '专家'
   },
   {
     field: 'Schedule.Name',
@@ -228,22 +236,11 @@ const predictionColumns = reactive<TableColumn[]>([
     }
   },
   {
-    field: 'Schedule.EndAt',
-    label: '结束时间',
-    width: 170,
-    align: 'center',
-    slots: {
-      default: ({ row }) => {
-        return <span>{formatTime(row.Schedule.EndAt)}</span>
-      }
-    }
-  },
-  {
-    field: 'R',
+    field: 'Prediction.RData',
     label: '方案',
     slots: {
       default: ({ row }) => {
-        return row.Prediction.Rl + row.Prediction.Rn
+        return row.Prediction.RData
       }
     }
   },
@@ -252,7 +249,18 @@ const predictionColumns = reactive<TableColumn[]>([
     label: '结果',
     slots: {
       default: ({ row }) => {
-        return row.Prediction.Result
+        switch (row.Prediction.Result) {
+          case 0:
+            return '-'
+          case 1:
+            return '赢'
+          case 2:
+            return '走'
+          case 3:
+            return '输'
+          default:
+            return `未知（` + row.Prediction.Result + `）`
+        }
       }
     }
   },
@@ -414,13 +422,9 @@ const predictionDialogSchema = reactive<FormSchema[]>([
                   </el-tag>
                 </div>
                 <div>
-                  时间:
+                  开始时间:
                   <el-tag effect="dark" type="success" round>
                     {formatTime(currentSchedule.value.StartAt)}
-                  </el-tag>
-                  ~
-                  <el-tag effect="dark" type="success" round>
-                    {formatTime(currentSchedule.value.EndAt)}
                   </el-tag>
                 </div>
               </div>
@@ -453,16 +457,8 @@ const predictionDialogSchema = reactive<FormSchema[]>([
     }
   },
   {
-    field: 'Rl',
-    label: 'RL',
-    component: 'Input',
-    formItemProps: {
-      rules: [required()]
-    }
-  },
-  {
-    field: 'Rn',
-    label: 'RN',
+    field: 'RData',
+    label: '盘口',
     component: 'Input',
     formItemProps: {
       rules: [required()]
@@ -580,10 +576,49 @@ const onUnSelectSeer = () => {
   predictionQuery.value = Object.assign(scheduleQuery.value, { SeerID: currentSeer.value.ID })
   predictionTableMethods.refresh()
 }
+
+const upload = ref<UploadInstance>()
+const uploading = ref<boolean>(false)
+const importErrors = ref<string[]>([])
+
+const handleExceed: UploadProps['onExceed'] = (files) => {
+  uploading.value = true
+  upload.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  upload.value!.handleStart(file)
+}
+const handleSuccess: UploadProps['onSuccess'] = (
+  response: any,
+  uploadFile: UploadFile,
+  uploadFiles: UploadFiles
+) => {
+  upload.value!.clearFiles()
+  uploading.value = false
+  console.log(response, uploadFile, uploadFiles)
+  if (response.Code != 0) {
+    importErrors.value = response.Data.Errors
+    ElMessage.error(response.Message)
+    return
+  } else {
+    ElMessage.success(response.Message)
+  }
+}
+
+const submitUpload = () => {
+  upload.value!.submit()
+}
+const importExcelDataDialogVisible = ref<boolean>(false)
+const onImportExcelData = () => {
+  importExcelDataDialogVisible.value = true
+}
 </script>
 
 <template>
   <ContentWrap title="专家管理">
+    <template #header>
+      <BaseButton type="primary" @click="onImportExcelData"> 电子表格导入数据</BaseButton>
+    </template>
     <ElRow :gutter="10">
       <ElCol :xs="24" :sm="24" :md="24" :lg="8" :xl="9">
         <ElCard class="box-card">
@@ -679,6 +714,37 @@ const onUnSelectSeer = () => {
       <BaseButton @click="scheduleDialogVisible = false">取消</BaseButton>
     </template>
   </Dialog>
+  <Dialog v-model="importExcelDataDialogVisible" :fullscreen="true" title="电子表格导入数据">
+    <el-upload
+      ref="upload"
+      :action="PATH_URL + '/api/seer/import-data'"
+      :limit="1"
+      :with-credentials="true"
+      accept=".xlsx"
+      :on-success="handleSuccess"
+      :on-exceed="handleExceed"
+      :auto-upload="false"
+    >
+      <template #trigger>
+        <el-button :loading="uploading" type="primary">选择Excel文件</el-button>
+      </template>
+      <el-button class="ml-3" :loading="uploading" type="success" @click="submitUpload">
+        导入
+      </el-button>
+    </el-upload>
+    <el-alert
+      v-for="(m, index) in importErrors"
+      style="margin: 10px 0"
+      :key="index"
+      :title="m"
+      type="error"
+      effect="dark"
+      :closable="false"
+    />
+    <template #footer>
+      <BaseButton @click="importExcelDataDialogVisible = false">取消</BaseButton>
+    </template>
+  </Dialog>
 </template>
 
 <style lang="less">
@@ -688,6 +754,7 @@ const onUnSelectSeer = () => {
   display: flex;
   justify-content: center;
 }
+
 .avatar-uploader .avatar {
   width: 100%;
   object-fit: contain;
