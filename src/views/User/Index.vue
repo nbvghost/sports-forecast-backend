@@ -5,7 +5,7 @@ import { useTable } from '@/hooks/web/useTable'
 import { h, reactive, ref } from 'vue'
 import { TableColumn } from '@/components/Table'
 import { formatTime } from '@/utils'
-import { postUserScoreRecharge, postUserState, putUserList } from '@/api/user'
+import { postUserAgent, postUserScoreRecharge, postUserState, putUserList } from '@/api/user'
 import { ElFormItem, ElInput, ElMessage, ElMessageBox, ElOption, ElSelect } from 'element-plus'
 import { BaseButton } from '@/components/Button'
 import { Dialog } from '@/components/Dialog'
@@ -29,11 +29,9 @@ const queryParams = ref<QueryParams>({})
 const userTable = useTable({
   fetchDataApi: async () => {
     const { currentPage, pageSize } = userTable.tableState
-
     if (!queryParams.value.ID) {
       delete queryParams.value.ID
     }
-
     const res = await putUserList(
       queryParams.value,
       { ColumnName: '', Method: '' },
@@ -46,7 +44,7 @@ const userTable = useTable({
     }
   }
 })
-const userTableState = userTable.tableState
+const { loading, dataList, total, currentPage, pageSize } = userTable.tableState
 const userTableMethods = userTable.tableMethods
 const userColumns = reactive<TableColumn[]>([
   {
@@ -103,11 +101,13 @@ const userColumns = reactive<TableColumn[]>([
     label: '状态',
     slots: {
       default: ({ row }) => {
-        let keyIndex = (row.UserInfoKeys || []).findIndex(
+        let userInfoKeys: string[] = row.UserInfoKeys || []
+        let userInfoValues: string[] = row.UserInfoValues || []
+        let keyIndex = userInfoKeys.findIndex(
           (value: string, _index: number, _obj: string[]) => value == 'State'
         )
         if (keyIndex > -1) {
-          let value = row.UserInfoValues[keyIndex]
+          let value = userInfoValues[keyIndex]
           let valueLabel = `未知($value)`
           switch (value) {
             case '':
@@ -117,9 +117,42 @@ const userColumns = reactive<TableColumn[]>([
               valueLabel = '封禁'
               break
           }
-          return <>{valueLabel}</>
+          return <span>{valueLabel}</span>
         } else {
-          return <></>
+          return <span>正常</span>
+        }
+      }
+    }
+  },
+  {
+    field: 'Agent',
+    label: '代理',
+    slots: {
+      default: ({ row }) => {
+        let userInfoKeys: string[] = row.UserInfoKeys || []
+        let userInfoValues: string[] = row.UserInfoValues || []
+        let keyIndex = userInfoKeys.findIndex(
+          (value: string, _index: number, _obj: string[]) => value == 'Agent'
+        )
+        if (keyIndex > -1) {
+          let value = userInfoValues[keyIndex] == 'true'
+          return (
+            <el-switch
+              onChange={() => {
+                onAgentUser(row)
+              }}
+              modelValue={value}
+            />
+          )
+        } else {
+          return (
+            <el-switch
+              onChange={() => {
+                onAgentUser(row)
+              }}
+              modelValue={false}
+            />
+          )
         }
       }
     }
@@ -129,7 +162,7 @@ const userColumns = reactive<TableColumn[]>([
     label: '操作',
     showOverflowTooltip: false,
     align: 'center',
-    width: 300,
+    width: 160,
     slots: {
       default: (data) => {
         return (
@@ -158,6 +191,22 @@ const userColumns = reactive<TableColumn[]>([
     }
   }
 ])
+const onAgentUser = async (row) => {
+  let userInfoKeys: string[] = row.UserInfoKeys || []
+  let userInfoValues: string[] = row.UserInfoValues || []
+  let keyIndex = userInfoKeys.findIndex(
+    (value: string, _index: number, _obj: string[]) => value == 'Agent'
+  )
+  let value = false
+  if (keyIndex > -1) {
+    value = userInfoValues[keyIndex] == 'true'
+  }
+  let res = await postUserAgent(row.ID, !value)
+  if (res.Code == 0) {
+    ElMessage.success(res.Message)
+  }
+  userTableMethods.refresh()
+}
 const onStateUser = (data) => {
   const selectValue = ref<UserInfoStateType>('')
   ElMessageBox({
@@ -302,16 +351,16 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
       </el-form-item>
     </el-form>
     <Table
-      v-model:pageSize="userTableState.pageSize.value"
-      v-model:currentPage="userTableState.currentPage.value"
+      v-model:pageSize="pageSize"
+      v-model:currentPage="currentPage"
       :highlight-current-row="true"
       :show-action="true"
       :flexible="true"
       :columns="userColumns"
-      :data="userTableState.dataList.value"
-      :loading="userTableState.loading.value"
+      :data="dataList"
+      :loading="loading"
       :pagination="{
-        total: userTableState.total.value,
+        total: total,
         small: true
       }"
       @register="userTable.tableRegister"

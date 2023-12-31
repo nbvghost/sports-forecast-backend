@@ -23,6 +23,12 @@ export const postUserState = async (
     data: { UserID: userID, State: state }
   })
 }
+export const postUserAgent = async (userID: number, agent: boolean): Promise<IResponse> => {
+  return request.post({
+    url: '/user/agent',
+    data: { UserID: userID, Agent: agent }
+  })
+}
 
 /**
  *

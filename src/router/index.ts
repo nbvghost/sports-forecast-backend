@@ -149,7 +149,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       {
         path: 'configuration',
         component: () => import('@/views/System/Configuration.vue'),
-        name: 'Configuration',
+        name: 'SystemConfiguration',
         meta: {
           title: '系统设置',
           icon: 'cib:telegram-plane'
