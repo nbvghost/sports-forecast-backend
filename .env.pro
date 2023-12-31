@@ -17,7 +17,7 @@ VITE_DROP_CONSOLE=true
 VITE_SOURCEMAP=false
 
 # 输出路径
-VITE_OUT_DIR=../view/back
+VITE_OUT_DIR=../server/view/back
 
 # 标题
 VITE_APP_TITLE=生舒体育管理后台

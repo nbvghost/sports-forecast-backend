@@ -11,8 +11,7 @@ import {
   ElAvatar,
   UploadInstance,
   UploadProps,
-  UploadRawFile,
-  genFileId
+  UploadRawFile
 } from 'element-plus'
 import { GetRestfull } from '@/api'
 import { useTable } from '@/hooks/web/useTable'
@@ -85,7 +84,9 @@ const seerTable = useTable({
       'Seer',
       Object.assign(seerQuery.value, {
         'page-no': unref(currentPage),
-        'page-size': unref(pageSize)
+        'page-size': unref(pageSize),
+        'order-field': 'CreatedAt',
+        'order-method': 'desc'
       })
     )
     return {
@@ -585,7 +586,7 @@ const handleExceed: UploadProps['onExceed'] = (files) => {
   uploading.value = true
   upload.value!.clearFiles()
   const file = files[0] as UploadRawFile
-  file.uid = genFileId()
+  file.uid = new Date().getTime()
   upload.value!.handleStart(file)
 }
 const handleSuccess: UploadProps['onSuccess'] = (
@@ -747,7 +748,7 @@ const onImportExcelData = () => {
   </Dialog>
 </template>
 
-<style lang="less">
+<style scoped>
 .avatar-uploader {
   width: 120px;
   height: 100px;

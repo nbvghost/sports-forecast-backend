@@ -130,6 +130,32 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: '/system',
+    component: Layout,
+    name: 'system',
+    meta: { title: '系统' },
+    children: [
+      {
+        path: 'message',
+        component: () => import('@/views/System/Message.vue'),
+        name: 'SystemMessage',
+        meta: {
+          title: '系统消息',
+          icon: 'cib:telegram-plane'
+        }
+      },
+      {
+        path: 'configuration',
+        component: () => import('@/views/System/Configuration.vue'),
+        name: 'Configuration',
+        meta: {
+          title: '系统设置',
+          icon: 'cib:telegram-plane'
+        }
+      }
+    ]
   }
 ]
 

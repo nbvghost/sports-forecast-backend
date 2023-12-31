@@ -188,7 +188,8 @@ const onStateUser = (data) => {
 const currentUser = ref<UserWithSuperiorUser>()
 const scoreJournalList = ref<ComponentRef<typeof ScoreJournalList>>()
 const onScoreRechargeSubmit = async () => {
-  if (currentUser.value?.ID == 0) {
+  const userID = currentUser?.value?.ID || 0
+  if (userID == 0) {
     ElMessage.error('用户信息错误，无法充值')
     return
   }
@@ -197,22 +198,14 @@ const onScoreRechargeSubmit = async () => {
     if (valid) {
       let formData = await scoreRechargeDialogForm.formMethods.getFormData(true)
       elFormExpose?.resetFields()
-      let res = await postUserScoreRecharge(
-        currentUser.value?.ID!,
-        parseInt(formData.Score),
-        formData.Reason
-      )
+
+      let res = await postUserScoreRecharge(userID, parseInt(formData.Score), formData.Reason)
       if (res.Code == 0) {
         ElMessage.success(res.Message)
         scoreJournalList.value!.refreshList()
         userTableMethods.refresh()
 
-        const resUser = await putUserList(
-          { ID: currentUser.value?.ID },
-          { ColumnName: '', Method: '' },
-          1,
-          1
-        )
+        const resUser = await putUserList({ ID: userID }, { ColumnName: '', Method: '' }, 1, 1)
         if (resUser.Code == 0 && resUser.Data.List.length > 0) {
           currentUser.value = resUser.Data.List[0]
         }
@@ -339,7 +332,7 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
       @register="scoreRechargeDialogForm.formRegister"
     />
     <ContentWrap title="充值记录">
-      <ScoreJournalList ref="scoreJournalList" :query-params="{ UserID: currentUser.ID }" />
+      <ScoreJournalList ref="scoreJournalList" :query-params="{ UserID: currentUser?.ID }" />
     </ContentWrap>
     <template #footer>
       <BaseButton @click="scoreRechargeDialogVisible = false">确定</BaseButton>
