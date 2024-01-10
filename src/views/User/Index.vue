@@ -343,8 +343,8 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
           clearable
         />
       </el-form-item>
-      <el-form-item label="手机号">
-        <el-input type="tel" v-model="queryParams.Phone" placeholder="用户ID" clearable />
+      <el-form-item label="手机尾号">
+        <el-input type="tel" v-model="queryParams.Phone" placeholder="手机尾号" clearable />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onQuerySubmit">查询</el-button>

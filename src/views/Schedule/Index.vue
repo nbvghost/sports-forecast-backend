@@ -107,7 +107,7 @@ const scheduleDialogSchema = reactive<FormSchema[]>([
     label: '盘口',
     component: 'Input',
     formItemProps: {
-      rules: [required()]
+      rules: []
     }
   },
   {

@@ -26,6 +26,7 @@ export type Prediction = {
   Rl: string
   Rn: string
   Result: number
+  WrongRefundScore: boolean
 }
 export type Schedule = {
   ID: number

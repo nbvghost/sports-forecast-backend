@@ -497,6 +497,14 @@ const predictionDialogSchema = reactive<FormSchema[]>([
     formItemProps: {
       rules: [required()]
     }
+  },
+  {
+    field: 'WrongRefundScore',
+    label: '不中即退',
+    component: 'Switch',
+    formItemProps: {
+      rules: []
+    }
   }
 ])
 const onPredictionDialogFormSubmit = async () => {
