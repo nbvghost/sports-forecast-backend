@@ -1,5 +1,6 @@
 import { OrderMethod, Prediction } from '@/api/types'
 import request from '@/axios'
+import { PredictionAnalyse } from '@/api/prediction/types'
 
 export const PutPredictionJoinScheduleList = async (
   Query: any,
@@ -24,6 +25,13 @@ export const deletePrediction = async (id: number): Promise<IResponse> => {
   return request.delete({
     url: '/prediction/index',
     data: { ID: id },
+    params: { ID: id }
+  })
+}
+
+export const getPredictionAnalyse = async (id: number): Promise<IResponse<PredictionAnalyse>> => {
+  return request.get({
+    url: '/prediction/analyse',
     params: { ID: id }
   })
 }

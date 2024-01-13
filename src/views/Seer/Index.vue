@@ -29,8 +29,14 @@ import { useForm } from '@/hooks/web/useForm'
 import { deleteSeer, postSeer } from '@/api/seer'
 import { PATH_URL } from '@/axios/service'
 import ScheduleList from '@/views/Components/ScheduleList.vue'
-import { deletePrediction, postPrediction, PutPredictionJoinScheduleList } from '@/api/prediction'
+import {
+  deletePrediction,
+  getPredictionAnalyse,
+  postPrediction,
+  PutPredictionJoinScheduleList
+} from '@/api/prediction'
 import { UploadFile, UploadFiles } from 'element-plus/es/components/upload/src/upload'
+import { PredictionAnalyse } from '@/api/prediction/types'
 
 const { required } = useValidator()
 
@@ -43,6 +49,36 @@ const predictionQuery = ref({})
 const predictionOrder = ref<OrderMethod>({ ColumnName: '', Method: '' })
 
 const currentSeer = ref<Seer>({ Avatar: '', Grades: [], ID: 0, Name: '', Signature: '' })
+const currentPredictionAnalyse = ref<PredictionAnalyse>({
+  GroupBuyAnalyse: {
+    StatusDoingCheckNum: 0,
+    StatusDoingNum: 0,
+    StatusDoingPredictionScore: 0,
+    StatusDoingPremiumScore: 0,
+    StatusDoingSplitScore: 0,
+    StatusFailureCheckNum: 0,
+    StatusFailureNum: 0,
+    StatusFailurePredictionScore: 0,
+    StatusFailurePremiumScore: 0,
+    StatusFailureSplitScore: 0,
+    StatusSuccessCheckNum: 0,
+    StatusSuccessNum: 0,
+    StatusSuccessPredictionScore: 0,
+    StatusSuccessPremiumScore: 0,
+    StatusSuccessSplitScore: 0,
+    TotalPredictionScore: 0,
+    TotalPremiumScore: 0,
+    TotalSplitScore: 0
+  },
+  UserOrderAnalyse: {
+    FromTypeDirect: 0,
+    FromTypeGroupBuy: 0,
+    StatusComplete: 0,
+    StatusPay: 0,
+    StatusRefund: 0,
+    Total: 0
+  }
+})
 const currentSchedule = ref<Schedule>({
   TypeName: '',
   EndAt: '',
@@ -55,6 +91,8 @@ const currentSchedule = ref<Schedule>({
   StartAt: ''
 })
 const currentPrediction = ref<Prediction>({
+  PremiumScore: 0,
+  WrongRefundScore: false,
   ID: 0,
   Recommend: '',
   Result: 0,
@@ -505,6 +543,14 @@ const predictionDialogSchema = reactive<FormSchema[]>([
     formItemProps: {
       rules: []
     }
+  },
+  {
+    field: 'PremiumScore',
+    label: '拼单收益',
+    component: 'InputNumber',
+    formItemProps: {
+      rules: []
+    }
   }
 ])
 const onPredictionDialogFormSubmit = async () => {
@@ -562,6 +608,8 @@ const onAddPrediction = () => {
     Rn: '',
     ScheduleID: 0,
     Score: 0,
+    WrongRefundScore: false,
+    PremiumScore: 0,
     SeerID: 0
   }
   predictionDialogVisible.value = true
@@ -572,6 +620,8 @@ const onEditPrediction = async (data) => {
   currentSeer.value.ID = currentPrediction.value.SeerID
   console.log('currentPrediction.value', currentPrediction.value)
   predictionDialogVisible.value = true
+  let res = await getPredictionAnalyse(currentPrediction.value.ID)
+  currentPredictionAnalyse.value = res.Data
   await nextTick()
   await predictionDialogForm.formMethods.setValues(currentPrediction.value)
 }
@@ -711,6 +761,120 @@ const onImportExcelData = () => {
     :title="currentPrediction.ID > 0 ? '修改方案' : '添加方案'"
   >
     <Form :schema="predictionDialogSchema" @register="predictionDialogForm.formRegister" />
+    <el-space v-if="currentPrediction.ID > 0" direction="vertical">
+      销售统计
+      <el-space direction="horizontal">
+        <el-badge value="总购买球币" class="item">
+          <el-button>{{ currentPredictionAnalyse.UserOrderAnalyse.Total }}</el-button>
+        </el-badge>
+        =
+        <el-badge value="购买中" class="item">
+          <el-button>{{ currentPredictionAnalyse.UserOrderAnalyse.StatusPay }}</el-button>
+        </el-badge>
+        +
+        <el-badge value="退款" class="item">
+          <el-button>{{ currentPredictionAnalyse.UserOrderAnalyse.StatusRefund }}</el-button>
+        </el-badge>
+        +
+        <el-badge value="购买完成" class="item">
+          <el-button>{{ currentPredictionAnalyse.UserOrderAnalyse.StatusComplete }}</el-button>
+        </el-badge>
+      </el-space>
+      来源统计
+      <el-space direction="horizontal">
+        <el-badge
+          :value="currentPredictionAnalyse.UserOrderAnalyse.Total"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>总购买来源</el-button>
+        </el-badge>
+        =
+        <el-badge
+          :value="currentPredictionAnalyse.UserOrderAnalyse.FromTypeDirect"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>直接购买</el-button>
+        </el-badge>
+        +
+        <el-badge
+          :value="currentPredictionAnalyse.UserOrderAnalyse.FromTypeGroupBuy"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单购买</el-button>
+        </el-badge>
+      </el-space>
+      拼单统计
+      <el-space direction="horizontal">
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.TotalPredictionScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单方案总金额</el-button>
+        </el-badge>
+        =
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusDoingPredictionScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单中</el-button>
+        </el-badge>
+        +
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusFailurePredictionScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单失败</el-button>
+        </el-badge>
+        +
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusSuccessPredictionScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单成功</el-button>
+        </el-badge>
+      </el-space>
+      拼单收益统计
+      <el-space direction="horizontal">
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.TotalPremiumScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单方案总收益</el-button>
+        </el-badge>
+        =
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusDoingPremiumScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单中</el-button>
+        </el-badge>
+        +
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusFailurePremiumScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单失败</el-button>
+        </el-badge>
+        +
+        <el-badge
+          :value="currentPredictionAnalyse.GroupBuyAnalyse.StatusSuccessPremiumScore"
+          :max="Number.MAX_VALUE"
+          class="item"
+        >
+          <el-button>拼单成功</el-button>
+        </el-badge>
+      </el-space>
+    </el-space>
     <template #footer>
       <BaseButton type="primary" @click="onPredictionDialogFormSubmit">提交</BaseButton>
       <BaseButton @click="predictionDialogVisible = false">取消</BaseButton>

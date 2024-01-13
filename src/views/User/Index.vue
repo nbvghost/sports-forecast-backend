@@ -2,10 +2,17 @@
 import { ContentWrap } from '@/components/ContentWrap'
 import Table from '@/components/Table/src/Table.vue'
 import { useTable } from '@/hooks/web/useTable'
-import { h, reactive, ref } from 'vue'
+import { h, nextTick, reactive, ref, unref } from 'vue'
 import { TableColumn } from '@/components/Table'
 import { formatTime } from '@/utils'
-import { postUserAgent, postUserScoreRecharge, postUserState, putUserList } from '@/api/user'
+import {
+  postSetSuperiorID,
+  postUserAgent,
+  postUserBrokerageLevel,
+  postUserScoreRecharge,
+  postUserState,
+  putUserList
+} from '@/api/user'
 import { ElFormItem, ElInput, ElMessage, ElMessageBox, ElOption, ElSelect } from 'element-plus'
 import { BaseButton } from '@/components/Button'
 import { Dialog } from '@/components/Dialog'
@@ -13,16 +20,18 @@ import { FormSchema } from '@/components/Form'
 import { useForm } from '@/hooks/web/useForm'
 import { useValidator } from '@/hooks/web/useValidator'
 import Form from '@/components/Form/src/Form.vue'
-import { UserInfoStateType, UserWithSuperiorUser } from '@/api/user/types'
+import { BrokerageLevel, User, UserInfoStateType, UserWithSuperiorUser } from '@/api/user/types'
 import Descriptions from '@/components/Descriptions/src/Descriptions.vue'
 import { DescriptionsSchema } from '@/components/Descriptions'
 import ScoreJournalList from '@/views/Components/ScoreJournalList.vue'
+import { GetRestfull } from '@/api'
 
 const { required } = useValidator()
 
 type QueryParams = {
   ID?: number
   Phone?: string
+  SuperiorID?: number
 }
 const queryParams = ref<QueryParams>({})
 
@@ -31,6 +40,9 @@ const userTable = useTable({
     const { currentPage, pageSize } = userTable.tableState
     if (!queryParams.value.ID) {
       delete queryParams.value.ID
+    }
+    if (!queryParams.value.SuperiorID) {
+      delete queryParams.value.SuperiorID
     }
     const res = await putUserList(
       queryParams.value,
@@ -85,7 +97,30 @@ const userColumns = reactive<TableColumn[]>([
   },
   {
     field: 'SuperiorUser.Name',
-    label: '上级'
+    label: '上级',
+    slots: {
+      default: ({ row }) => {
+        if (row.SuperiorUser.Name == '') {
+          return <>平台</>
+        } else {
+          return (
+            <>
+              <el-button
+                type="warning"
+                size="small"
+                class="me-2"
+                onClick={() => {
+                  setTopLevelUser(row)
+                }}
+              >
+                挂靠平台
+              </el-button>
+              <span>{row.SuperiorUser.Name}</span>
+            </>
+          )
+        }
+      }
+    }
   },
   {
     field: 'CreatedAt',
@@ -162,11 +197,29 @@ const userColumns = reactive<TableColumn[]>([
     label: '操作',
     showOverflowTooltip: false,
     align: 'center',
-    width: 160,
+    width: 350,
     slots: {
       default: (data) => {
         return (
           <div>
+            <el-button
+              type="warning"
+              size="small"
+              onClick={() => {
+                setBrokerageLevel(data)
+              }}
+            >
+              分成比例设置
+            </el-button>
+            <el-button
+              type="info"
+              size="small"
+              onClick={() => {
+                onSubLevelUser(data)
+              }}
+            >
+              查看下级
+            </el-button>
             <el-button
               type="danger"
               size="small"
@@ -191,6 +244,21 @@ const userColumns = reactive<TableColumn[]>([
     }
   }
 ])
+const setTopLevelUser = async (row) => {
+  ElMessageBox({
+    title: '选择状态',
+    showCancelButton: true,
+    message: `确定把用户【${row.Name}】挂靠到平台?`
+  }).then(async (action) => {
+    if (action == 'confirm') {
+      let res = await postSetSuperiorID(row.ID, 0)
+      if (res.Code == 0) {
+        ElMessage.success(res.Message)
+      }
+      userTableMethods.refresh()
+    }
+  })
+}
 const onAgentUser = async (row) => {
   let userInfoKeys: string[] = row.UserInfoKeys || []
   let userInfoValues: string[] = row.UserInfoValues || []
@@ -205,6 +273,45 @@ const onAgentUser = async (row) => {
   if (res.Code == 0) {
     ElMessage.success(res.Message)
   }
+  userTableMethods.refresh()
+}
+const setBrokerageLevel = async (data) => {
+  let userInfoKeys = data.row.UserInfoKeys || []
+  let userInfoValues = data.row.UserInfoValues || []
+
+  let bl1 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve1'
+  })
+  let bl2 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve2'
+  })
+  let bl3 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve3'
+  })
+  let bl4 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve4'
+  })
+  let bl5 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve5'
+  })
+  let bl6 = userInfoKeys.findIndex((value, _index, _obj) => {
+    return value == 'BrokerageLeve6'
+  })
+  brokerageLevelDialogVisible.value = true
+  await nextTick()
+  await brokerageLevelDialogForm.formMethods.setValues({
+    Leve1: parseFloat(userInfoValues[bl1]) || 0,
+    Leve2: parseFloat(userInfoValues[bl2]) || 0,
+    Leve3: parseFloat(userInfoValues[bl3]) || 0,
+    Leve4: parseFloat(userInfoValues[bl4]) || 0,
+    Leve5: parseFloat(userInfoValues[bl5]) || 0,
+    Leve6: parseFloat(userInfoValues[bl6]) || 0
+  })
+  currentUser.value = data.row
+}
+const onSubLevelUser = (data) => {
+  superiorList.value.push({ Name: data.row.Name, ID: data.row.ID })
+  queryParams.value = { SuperiorID: data.row.ID }
   userTableMethods.refresh()
 }
 const onStateUser = (data) => {
@@ -269,6 +376,7 @@ const onUserScoreRecharge = (data) => {
   scoreRechargeDialogVisible.value = true
 }
 const onQuerySubmit = () => {
+  superiorList.value = []
   userTableMethods.refresh()
 }
 const scoreRechargeDialogVisible = ref(false)
@@ -329,6 +437,126 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
     label: '上级'
   }
 ])
+type SuperiorItem = {
+  Name: string
+  ID: number
+}
+const superiorList = ref<SuperiorItem[]>([])
+const onCloseSuperior = (index: number) => {
+  let list = superiorList.value
+  list.splice(index, 1)
+  superiorList.value = list
+  if (list.length == 0) {
+    queryParams.value = {}
+    userTableMethods.refresh()
+  }
+}
+const onClickSuperior = (index: number) => {
+  queryParams.value = { SuperiorID: superiorList.value[index].ID }
+  userTableMethods.refresh()
+}
+const brokerageLevelDialogVisible = ref(false)
+const brokerageLevelDialogForm = useForm()
+const brokerageLevelDialogSchema = reactive<FormSchema[]>([
+  {
+    field: 'Leve1',
+    label: '一级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  },
+  {
+    field: 'Leve2',
+    label: '二级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  },
+  {
+    field: 'Leve3',
+    label: '三级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  },
+  {
+    field: 'Leve4',
+    label: '四级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  },
+  {
+    field: 'Leve5',
+    label: '五级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  },
+  {
+    field: 'Leve6',
+    label: '六级(%)',
+    component: 'InputNumber',
+    componentProps: {
+      precision: 2,
+      step: 0.1,
+      max: 100,
+      min: 0
+    },
+    formItemProps: {
+      rules: []
+    }
+  }
+])
+const onSubmitBrokerageLevel = async () => {
+  const elFormExpose = await brokerageLevelDialogForm.formMethods.getElFormExpose()
+  elFormExpose?.validate(async (valid) => {
+    if (valid && currentUser.value) {
+      let formData = await brokerageLevelDialogForm.formMethods.getFormData<BrokerageLevel>()
+      let res = await postUserBrokerageLevel(currentUser.value!.ID, formData)
+      if (res.Code == 0) {
+        brokerageLevelDialogVisible.value = false
+        ElMessage.success(res.Message)
+        userTableMethods.refresh()
+      }
+    }
+  })
+}
 </script>
 
 <template>
@@ -346,10 +574,31 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
       <el-form-item label="手机尾号">
         <el-input type="tel" v-model="queryParams.Phone" placeholder="手机尾号" clearable />
       </el-form-item>
+      <el-form-item label="上级ID">
+        <el-input
+          type="number"
+          v-model.number="queryParams.SuperiorID"
+          placeholder="上级ID"
+          clearable
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onQuerySubmit">查询</el-button>
       </el-form-item>
     </el-form>
+    <div>
+      <el-tag
+        v-for="(tag, index) in superiorList"
+        @close="onCloseSuperior(index)"
+        @click="onClickSuperior(index)"
+        :data-index="index"
+        :key="index"
+        class="mx-1"
+        closable
+      >
+        {{ tag.Name }}
+      </el-tag>
+    </div>
     <Table
       v-model:pageSize="pageSize"
       v-model:currentPage="currentPage"
@@ -385,6 +634,13 @@ const descriptionUser = reactive<DescriptionsSchema[]>([
     </ContentWrap>
     <template #footer>
       <BaseButton @click="scoreRechargeDialogVisible = false">确定</BaseButton>
+    </template>
+  </Dialog>
+  <Dialog v-model="brokerageLevelDialogVisible" :fullscreen="true" title="充值">
+    <Form :schema="brokerageLevelDialogSchema" @register="brokerageLevelDialogForm.formRegister" />
+    <template #footer>
+      <BaseButton type="default" @click="brokerageLevelDialogVisible = false">取消</BaseButton>
+      <BaseButton type="primary" @click="onSubmitBrokerageLevel">确定</BaseButton>
     </template>
   </Dialog>
 </template>

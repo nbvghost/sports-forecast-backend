@@ -1,6 +1,11 @@
 import { OrderMethod, Pagination } from '@/api/types'
 import request from '@/axios'
-import { ScoreJournalWithUser, UserInfoStateType, UserWithSuperiorUser } from '@/api/user/types'
+import {
+  BrokerageLevel,
+  ScoreJournalWithUser,
+  UserInfoStateType,
+  UserWithSuperiorUser
+} from '@/api/user/types'
 
 export const putUserList = async (
   Query: any,
@@ -29,7 +34,21 @@ export const postUserAgent = async (userID: number, agent: boolean): Promise<IRe
     data: { UserID: userID, Agent: agent }
   })
 }
-
+export const postUserBrokerageLevel = async (
+  userID: number,
+  bl: BrokerageLevel
+): Promise<IResponse> => {
+  return request.post({
+    url: '/user/set-brokerage-level',
+    data: { UserID: userID, BrokerageLevel: bl }
+  })
+}
+export const postSetSuperiorID = async (userID: number, superiorID: number): Promise<IResponse> => {
+  return request.post({
+    url: '/user/set-superior-id',
+    data: { UserID: userID, SuperiorID: superiorID }
+  })
+}
 /**
  *
  * UserID dao.PrimaryKey

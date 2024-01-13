@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { Editor } from '@/components/Editor'
 import { ElMessage, FormInstance, UploadProps } from 'element-plus'
 import { UploadFile, UploadFiles } from 'element-plus/es/components/upload/src/upload'
-import { getConfigurations, postConfiguration, putConfigurations } from '@/api/system'
+import { postConfiguration, putConfigurations } from '@/api/system'
 
 const editorConfig: any = {
   MENU_CONF: {
@@ -180,7 +180,7 @@ onLoad()
 
 const handleReceivableQrcodeChange: UploadProps['onChange'] = (
   uploadFile: UploadFile,
-  uploadFiles: UploadFiles
+  _uploadFiles: UploadFiles
 ) => {
   let fileReader = new FileReader()
   fileReader.onloadend = function (e) {
@@ -209,7 +209,7 @@ const onSubmitForm = async (formEl: FormInstance | undefined, formData: any) => 
 
 <template>
   <ContentWrap title="系统设置">
-    <el-card class="box-card">
+    <el-card style="display: none" class="box-card">
       <template #header>
         <div class="card-header">
           <span>拼单收益设置</span>
@@ -245,7 +245,7 @@ const onSubmitForm = async (formEl: FormInstance | undefined, formData: any) => 
         </el-form>
       </div>
     </el-card>
-    <el-card class="box-card">
+    <el-card style="display: none" class="box-card">
       <template #header>
         <div class="card-header">
           <span>分成比例设置</span>

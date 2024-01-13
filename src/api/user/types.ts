@@ -40,3 +40,12 @@ export type ScoreJournalWithUser = {
   ScoreJournal: ScoreJournal
   User: User
 }
+
+export type BrokerageLevel = {
+  Leve1: number
+  Leve2: number
+  Leve3: number
+  Leve4: number
+  Leve5: number
+  Leve6: number
+}
