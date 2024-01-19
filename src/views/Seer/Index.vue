@@ -104,14 +104,12 @@ const currentPrediction = ref<Prediction>({
 })
 
 const onSeerRowClick = (row, column, event) => {
-  console.log(row, column, event)
   currentSeer.value = row
   predictionQuery.value = Object.assign(scheduleQuery.value, { SeerID: currentSeer.value.ID })
   predictionTableMethods.refresh()
 }
 
 const onPredictionRowClick = (row, column, event) => {
-  console.log(row, column, event)
   //currentPrediction.value = row
 }
 
@@ -384,7 +382,6 @@ const seerDialogSchema = reactive<FormSchema[]>([
       multiple: false,
       withCredentials: true,
       onSuccess: async (responseBody: IResponse, _uploadFile) => {
-        console.log(responseBody)
         await seerDialogForm.formMethods.setValues({ Avatar: responseBody.Data.TempFileName })
         let uploader = (await seerDialogForm.formMethods.getComponentExpose(
           'Upload'
@@ -654,7 +651,6 @@ const handleSuccess: UploadProps['onSuccess'] = (
 ) => {
   upload.value!.clearFiles()
   uploading.value = false
-  console.log(response, uploadFile, uploadFiles)
   if (response.Code != 0) {
     importErrors.value = response.Data.Errors
     ElMessage.error(response.Message)

@@ -49,7 +49,6 @@ const shortcuts = [
 ]
 
 const onScheduleRowClick = (row, column, event) => {
-  console.log(row, column, event)
   //currentSchedule.value = row
 }
 
@@ -186,7 +185,7 @@ const emit = defineEmits(['editRow', 'deleteRow', 'select'])
     <el-form-item label="日期">
       <el-date-picker
         v-model="queryParams.StartAt"
-        type="Date"
+        type="date"
         value-format="YYYY-MM-DDTHH:mm:ss.SSSZ"
         placeholder="选择日期"
         :shortcuts="shortcuts"

@@ -195,7 +195,6 @@ const onSubmitForm = async (formEl: FormInstance | undefined, formData: any) => 
 
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log('submit!', formEl, fields, formData)
       let res = await postConfiguration(formData)
       if (res.Code == 0) {
         ElMessage.success(res.Message)

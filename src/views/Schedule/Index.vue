@@ -30,7 +30,13 @@ const currentSchedule = ref<Schedule>({
 })
 const scheduleDialogVisible = ref<boolean>(false)
 
-const onAddSchedule = () => {
+const onAddSchedule = async () => {
+  scheduleDialogVisible.value = true
+
+  await nextTick()
+
+  let now = new Date()
+
   currentSchedule.value = {
     EndAt: '',
     Guester: '',
@@ -39,17 +45,23 @@ const onAddSchedule = () => {
     Name: '',
     Rl: '',
     Rn: '',
-    StartAt: '',
-    TypeName: ''
+    StartAt: dayjs(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)).format(
+      'YYYY-MM-DDTHH:mm:ss.SSSZ'
+    ),
+    TypeName: '足球'
   }
-  scheduleDialogVisible.value = true
+  await scheduleDialogForm.formMethods.setValues(currentSchedule.value)
 }
 const onScheduleDialogFormSubmit = async () => {
   const elFormExpose = await scheduleDialogForm.formMethods.getElFormExpose()
   elFormExpose?.validate(async (valid) => {
     if (valid) {
       let data = await scheduleDialogForm.formMethods.getFormData<Schedule>()
-      console.log('submit success', data)
+      if (new Date(data.StartAt).getTime() == 0) {
+        ElMessage.error('请选择赛事开始时间')
+        return
+      }
+
       let result = await postSchedule(data)
       if (result.Code == 0) {
         scheduleDialogVisible.value = false
@@ -93,7 +105,6 @@ const scheduleDialogSchema = reactive<FormSchema[]>([
     field: 'StartAt',
     label: '开始时间',
     component: 'DatePicker',
-    //value: '2023-12-21T23:35:09+08:00',
     componentProps: {
       type: 'datetime',
       valueFormat: 'YYYY-MM-DDTHH:mm:ss.SSSZ'

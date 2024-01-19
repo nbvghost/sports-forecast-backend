@@ -14,7 +14,6 @@ const props = defineProps({
 })
 
 const onScheduleRowClick = (row, column, event) => {
-  console.log(row, column, event)
   //currentSchedule.value = row
 }
 

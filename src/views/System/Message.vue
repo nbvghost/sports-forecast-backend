@@ -12,7 +12,7 @@ import { BaseButton } from '@/components/Button'
 import { useForm } from '@/hooks/web/useForm'
 import { FormSchema } from '@/components/Form'
 import { useValidator } from '@/hooks/web/useValidator'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { SystemMessage } from '@/api/system/types'
 
 const { required } = useValidator()
@@ -206,11 +206,15 @@ const onAddSystemMessage = () => {
 
 const currentSystemMessage = ref<SystemMessage>({ Content: '', ID: 0, Title: '' })
 const onDeleteSystemMessage = async (data) => {
-  console.log(data)
-  let res = await deleteSystemMessage(data.row.ID)
-  if (res.Code == 0) {
-    ElMessage.success(res.Message)
-  }
+  ElMessageBox.confirm(`确定删除这个系统消息？`)
+    .then(async () => {
+      let res = await deleteSystemMessage(data.row.ID)
+      if (res.Code == 0) {
+        ElMessage.success(res.Message)
+        userTableMethods.refresh()
+      }
+    })
+    .catch(() => {})
 }
 const onEditSystemMessage = async (data) => {
   console.log(data)
